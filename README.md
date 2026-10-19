@@ -48,9 +48,14 @@ so nothing large ever moves between machines.
 - **No GPU needed until exercise 06.** Exercise 01's requirements contain no
   torch at all — just jupyter, numpy, matplotlib, pandas, seaborn. The README
   states exercises 1–5 need no acceleration.
-- The course prescribes conda with python 3.11. `bootstrap.sh` uses uv (or a
-  plain venv) against the same pinned `requirements.txt`, which is equivalent
+- The course prescribes conda with python 3.11. `bootstrap.sh` uses uv against
+  the same pinned `requirements.txt` and pins the same 3.11, which is equivalent
   for grading — the submission server only ever sees your zip.
+- **`jupyter notebook` will not work.** The shipped requirements include
+  `ipykernel` but not the `notebook` package, so there is no server binary in
+  the env. In VSCode this does not matter — the Jupyter extension only needs
+  ipykernel, so just open the `.ipynb` and pick `.venv` as the kernel. If you
+  want the browser UI: `uv pip install notebook`.
 - The shipped `requirements.txt` files are **UTF-16 encoded**. pip decodes them
   fine (verified), but they will look like binary to grep and most editors.
 - The notebook's version check prints "we expect python 3.10.x" while the README

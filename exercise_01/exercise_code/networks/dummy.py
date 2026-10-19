@@ -48,12 +48,7 @@ class Dummy(Network):
         :return: set x to any integer larger than 59 and smaller than 101 to get passed
         """
 
-        ########################################################################
-        # TODO                                                                 #
-        # Implement the dummy machine function.                                #
-        #                                                                      #
-        ########################################################################
-
+        x = 100
 
         pass
 

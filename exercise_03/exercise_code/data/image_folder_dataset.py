@@ -75,16 +75,13 @@ class ImageFolderDataset(Dataset):
 
     def __len__(self):
         length = None
-        ########################################################################
-        # TODO:                                                                #
-        # Return the length of the dataset (number of images)                  #
-        ########################################################################
 
+        if len(self.images) != len(self.labels):
+            raise RuntimeError("The number of images and labels do not match.")
+        else:
+            length = len(self.images)
         pass
-
-        ########################################################################
-        #                           END OF YOUR CODE                           #
-        ########################################################################
+        
         return length
 
     @staticmethod
@@ -120,7 +117,15 @@ class ImageFolderDataset(Dataset):
         # Hint 4: the labels and images are already prepared and stored in     #
         #  self.labels and self.images. DO NOT call self.make_dataset() again! #    
         ########################################################################
-   
+        if self.transform is not None:
+            image = self.transform(self.load_image_as_numpy(self.images[index]))
+        else:
+            image = self.load_image_as_numpy(self.images[index])
+
+        data_dict = {
+            "image": image,
+            "label": self.labels[index]
+        }
 
         pass
 

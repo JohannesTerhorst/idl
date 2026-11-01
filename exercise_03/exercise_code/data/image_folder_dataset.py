@@ -117,13 +117,9 @@ class ImageFolderDataset(Dataset):
         # Hint 4: the labels and images are already prepared and stored in     #
         #  self.labels and self.images. DO NOT call self.make_dataset() again! #    
         ########################################################################
-        if self.transform is not None:
-            image = self.transform(self.load_image_as_numpy(self.images[index]))
-        else:
-            image = self.load_image_as_numpy(self.images[index])
 
         data_dict = {
-            "image": image,
+            "image": self.transform(self.load_image_as_numpy(self.images[index])),
             "label": self.labels[index]
         }
 

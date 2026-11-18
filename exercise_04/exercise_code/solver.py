@@ -102,7 +102,31 @@ class Solver(object):
         #   Hint 2: Don't forget the order of operations: forward, loss,       #
         #   backward.                                                          #
         ########################################################################
-
+        # --- 1. EXPLANATION ---------------------------------------------------
+        # One training iteration = the standard deep-learning pipeline:
+        #   1) forward pass:   model turns inputs into predictions
+        #   2) loss:           compare predictions with labels (for logging)
+        #   3) backward pass:  loss gradient dL/dy_pred, then the model turns
+        #                      it into dL/dW (chain rule)
+        #   4) update:         optimizer moves W against the gradient
+        # Here it is "full batch": the whole training set in every step.
+        #
+        # --- 2. PSEUDO CODE ---------------------------------------------------
+        #   y_pred = model.forward(X_train)                  # also fills cache
+        #   loss   = loss_func(y_pred, y_train)              # optional here
+        #   dout   = loss_func.backward(y_pred, y_train)     # dL/dy_pred
+        #   dW     = model.backward(dout)                    # dL/dW
+        #   opt.step(dW)                                     # W <- W - lr*dW
+        #
+        # --- 3. WATCH OUT / OPTIMIZATION -------------------------------------
+        # - Order matters: model.backward() needs the cache from forward().
+        # - Pass the PREDICTIONS (y_pred), not X_train, to the loss.
+        # - Argument order of the loss: (y_out, y_truth).
+        # - Computing the loss value isn't needed for the update itself
+        #   (train() calls check_loss separately), so it may be skipped.
+        # - Possible improvement: mini-batches (shuffle, iterate over chunks)
+        #   -> cheaper steps and noisier gradients that help generalisation.
+        ########################################################################
 
         pass
 

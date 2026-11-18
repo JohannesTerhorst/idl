@@ -63,7 +63,27 @@ class Classifier(Network):
         #       The function is made up of TWO functions: Affine and sigmoid.  #
         #       The sigmoid is applied to the result of the affine step.       #
         ########################################################################
-
+        # --- 1. EXPLANATION ---------------------------------------------------
+        # Logistic regression = linear (affine) layer followed by a sigmoid:
+        #       s = X @ W            (N x (D+1)) @ ((D+1) x 1) -> N x 1
+        #       z = sigmoid(s)       probability that the label is 1
+        # The bias is already handled: X got an extra column of ones above,
+        # so the last row of W acts as the bias b.
+        # For the backward pass we need X (for dW = X^T ...) and z (for the
+        # sigmoid derivative z(1-z)), so we store them in the cache.
+        #
+        # --- 2. PSEUDO CODE ---------------------------------------------------
+        #   s          = X @ self.W         (or np.dot(X, self.W))
+        #   z          = self.sigmoid(s)
+        #   self.cache = (X, z)             (optionally s as well)
+        #
+        # --- 3. WATCH OUT / OPTIMIZATION -------------------------------------
+        # - Use matrix multiplication (@ / np.dot), NOT element-wise '*'.
+        # - Cache the X WITH the ones column (the one after concatenate),
+        #   otherwise dW will have shape D x 1 instead of (D+1) x 1.
+        # - Storing z means the backward pass does not have to recompute the
+        #   sigmoid (cheap here, but a key idea for bigger networks).
+        ########################################################################
 
         pass
 
@@ -102,7 +122,31 @@ class Classifier(Network):
         # Hint 3: The argument "dout" stands for the upstream gradeint to this #
         # layer.                                                               #
         ########################################################################
-
+        # --- 1. EXPLANATION ---------------------------------------------------
+        # Chain rule, in REVERSE order of the forward pass (s = XW, z = σ(s)):
+        #
+        #   dL/dz = dout                         (given by the loss backward)
+        #   dL/ds = dL/dz * dz/ds = dout * z * (1 - z)      (element-wise)
+        #           because σ'(s) = σ(s)(1 - σ(s)) = z(1 - z)
+        #   dL/dW = X^T @ dL/ds                  (matrix product)
+        #
+        # Why X^T? Each weight W_j influences every sample through X[i, j],
+        # so dL/dW_j = sum_i X[i, j] * dL/ds_i, which is exactly X^T @ dL/ds.
+        #
+        # --- 2. PSEUDO CODE ---------------------------------------------------
+        #   X, z = self.cache
+        #   ds   = dout * z * (1 - z)           # N x 1
+        #   dW   = X.T @ ds                     # (D+1) x N @ N x 1 -> (D+1) x 1
+        #
+        # --- 3. WATCH OUT / OPTIMIZATION -------------------------------------
+        # - Shape check: dW must have the same shape as self.W ((D+1) x 1).
+        #   If dout comes in as (N,), reshape it to (N, 1) first, otherwise
+        #   dout * z broadcasts to N x N.
+        # - Do NOT divide by N here: the 1/N is already inside dout
+        #   (from the loss backward). Dividing twice shrinks the gradient.
+        # - '*' for the element-wise sigmoid part, '@' for the X^T product.
+        # - Use the cached z, don't call sigmoid again.
+        ########################################################################
 
         pass
 
@@ -125,7 +169,24 @@ class Classifier(Network):
         # Implement the sigmoid function over the input x. Return "out".       #
         # Note: The sigmoid() function operates element-wise.                  #
         ########################################################################
-
+        # --- 1. EXPLANATION ---------------------------------------------------
+        # The sigmoid squashes any real number into (0, 1), so the output can
+        # be read as a probability:
+        #       σ(x) = 1 / (1 + e^(-x))
+        # σ(0) = 0.5, σ(large +) -> 1, σ(large -) -> 0.
+        # Its derivative is σ(x) * (1 - σ(x)) (used in backward()).
+        #
+        # --- 2. PSEUDO CODE ---------------------------------------------------
+        #   out = 1 / (1 + np.exp(-x))
+        #
+        # --- 3. WATCH OUT / OPTIMIZATION -------------------------------------
+        # - Use np.exp (works element-wise on any array shape), not math.exp.
+        # - For very negative x, np.exp(-x) overflows -> RuntimeWarning
+        #   (result still becomes 0, so it usually works). A stable version:
+        #     x >= 0:  1 / (1 + exp(-x))
+        #     x <  0:  exp(x) / (1 + exp(x))
+        #   e.g. via np.where, or np.clip(x, -500, 500) before exp.
+        ########################################################################
 
         pass
 

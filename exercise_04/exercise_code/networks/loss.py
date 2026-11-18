@@ -110,20 +110,10 @@ class BCE(Loss):
                 for each sample of your training set.
             - individual_losses=True  --> [N, ] array of binary cross entropy loss values for each sample of your batch.
         """
-        result = None
-        ########################################################################
-        # TODO:                                                                #
-        # Implement the forward pass and return the output of the BCE loss     #
-        # for each instance in the batch.                                      #
-        #                                                                      #
-        ########################################################################
 
-
-        pass
-
-        ########################################################################
-        #                           END OF YOUR CODE                           #
-        ########################################################################
+        y_out   = np.clip(y_out.reshape(-1), 1e-12, 1 - 1e-12)
+        y_truth = y_truth.reshape(-1)
+        result  = -(y_truth * np.log(y_out) + (1 - y_truth) * np.log(1 - y_out))
         
         if individual_losses:
             return result   # return a list of loss values, without taking the mean.
@@ -151,7 +141,31 @@ class BCE(Loss):
         #   Don't forget to divide by N, which is the number of samples in     #
         #   the batch. It is crucial for the magnitude of the gradient.        #
         ########################################################################
-
+        # --- 1. EXPLANATION ---------------------------------------------------
+        # We need dL/dp for every sample, where L = mean_i(L_i) and p = y_out.
+        # Differentiate L_i = -[ y log(p) + (1-y) log(1-p) ] w.r.t. p:
+        #
+        #       dL_i/dp_i = -( y_i / p_i  -  (1 - y_i) / (1 - p_i) )
+        #
+        # Because the forward pass takes the MEAN over N samples, every
+        # per-sample gradient is additionally multiplied by 1/N.
+        #
+        # --- 2. PSEUDO CODE ---------------------------------------------------
+        #   N        = number of samples (len(y_out) / y_out.shape[0])
+        #   gradient = -( y_truth / y_out - (1 - y_truth) / (1 - y_out) )
+        #   gradient = gradient / N
+        #
+        # --- 3. WATCH OUT / OPTIMIZATION -------------------------------------
+        # - Division by zero if p is exactly 0 or 1 -> clip p like in forward.
+        # - Same shape trap as in forward: gradient must have the SAME shape
+        #   as y_out (it is passed as 'dout' to Classifier.backward()).
+        # - Nice fact: chaining this with the sigmoid derivative p(1-p) gives
+        #   dL/ds = (p - y) / N. Frameworks fuse sigmoid+BCE for exactly this
+        #   reason (cheaper and numerically stable). Here, keep them separate
+        #   because the classifier multiplies by p(1-p) itself.
+        # - Sanity check: compare with a numerical gradient
+        #   (L(p + h) - L(p - h)) / 2h for a tiny h.
+        ########################################################################
 
         pass
 

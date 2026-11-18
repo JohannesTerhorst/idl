@@ -1,0 +1,256 @@
+import numpy as np
+
+
+class Sigmoid:
+    def __init__(self):
+        pass
+
+    def forward(self, x):
+        """
+        :param x: Inputs, of any shape.
+
+        :return out: Outputs, of the same shape as x.
+        :return cache: Cache, stored for backward computation, of the same shape as x.
+        """
+        shape = x.shape
+        out, cache = np.zeros(shape), np.zeros(shape)
+        ########################################################################
+        # TODO:                                                                #
+        # Implement the forward pass of Sigmoid activation function            #
+        ########################################################################
+        # --- 1. EXPLANATION ---------------------------------------------------
+        # Element-wise squashing into (0, 1):   s(x) = 1 / (1 + exp(-x))
+        # The cache holds what backward() needs. Here that is the OUTPUT s(x)
+        # itself, because the derivative can be written using only s(x):
+        #       s'(x) = s(x) * (1 - s(x))
+        #
+        # --- 2. PSEUDO CODE ---------------------------------------------------
+        #   out   = 1 / (1 + exp(-x))
+        #   cache = out
+        #
+        # --- 3. WATCH OUT / OPTIMIZATION -------------------------------------
+        # - Caching out (rather than x) means backward does not recompute exp.
+        # - For very negative x, exp(-x) overflows to inf. numpy only warns,
+        #   and 1/inf = 0 is still the right limit, so that is fine here.
+        # - Docstring: cache must have the same shape as x. out already does.
+        ########################################################################
+
+        pass
+
+        ########################################################################
+        #                           END OF YOUR CODE                           #
+        ########################################################################
+        return out, cache
+
+    def backward(self, dout, cache):
+        """
+        :param dout: Upstream gradient from the computational graph, from the Loss function
+                    and up to this layer. Has the shape of the output of forward().
+        :param cache: The values that were stored during forward() to the memory,
+                    to be used during the backpropagation.
+        :return: dx: the gradient w.r.t. input X, of the same shape as X
+        """
+        dx = None
+        ########################################################################
+        # TODO:                                                                #
+        # Implement the backward pass of Sigmoid activation function           #
+        ########################################################################
+        # --- 1. EXPLANATION ---------------------------------------------------
+        # Chain rule: dL/dx = dL/dout * dout/dx. dout is dL/dout (upstream), and
+        # dout/dx = s(x)(1 - s(x)), which we get from the cached output.
+        # Sigmoid works element-wise, so its Jacobian is diagonal and the
+        # chain rule becomes an element-wise product (no matrix multiply).
+        #
+        # --- 2. PSEUDO CODE ---------------------------------------------------
+        #   s  = cache
+        #   dx = dout * s * (1 - s)
+        #
+        # --- 3. WATCH OUT / OPTIMIZATION -------------------------------------
+        # - Use '*', not np.dot / '@'.
+        # - s(1-s) is at most 0.25, so stacking many sigmoids shrinks the
+        #   gradient each time ("vanishing gradients"). That is one reason
+        #   ReLU replaced it.
+        ########################################################################
+
+        pass
+
+        ########################################################################
+        #                           END OF YOUR CODE                           #
+        ########################################################################
+        return dx
+
+
+class Relu:
+    def __init__(self):
+        pass
+
+    def forward(self, x):
+        """
+        :param x: Inputs, of any shape.
+
+        :return outputs: Outputs, of the same shape as x.
+        :return cache: Cache, stored for backward computation, of the same shape as x.
+        """
+        out = None
+        cache = None
+        ########################################################################
+        # TODO:                                                                #
+        # Implement the forward pass of Relu activation function               #
+        ########################################################################
+        # --- 1. EXPLANATION ---------------------------------------------------
+        # ReLU(x) = max(0, x), element-wise. Backward only needs to know WHERE
+        # x was positive, so cache the input x (or a boolean mask x > 0).
+        #
+        # --- 2. PSEUDO CODE ---------------------------------------------------
+        #   out   = np.maximum(0, x)
+        #   cache = x
+        #
+        # --- 3. WATCH OUT / OPTIMIZATION -------------------------------------
+        # - np.maximum (element-wise, 2 arrays/scalars), NOT np.max (reduction
+        #   to a single value).
+        # - Avoid modifying x in place (e.g. x[x < 0] = 0): it would also
+        #   change the caller's array and the cache.
+        ########################################################################
+
+        pass
+
+        ########################################################################
+        #                           END OF YOUR CODE                           #
+        ########################################################################
+        return out, cache
+
+    def backward(self, dout, cache):
+        """
+        :param dout: Upstream gradient from the computational graph, from the Loss function
+                    and up to this layer. Has the shape of the output of forward().
+        :param cache: The values that were stored during forward() to the memory,
+                    to be used during the backpropagation.
+        :return: dx: the gradient w.r.t. input X, of the same shape as X
+        """
+        dx = None
+        ########################################################################
+        # TODO:                                                                #
+        # Implement the backward pass of Relu activation function              #
+        ########################################################################
+        # --- 1. EXPLANATION ---------------------------------------------------
+        # Derivative of max(0, x): 1 where x > 0, 0 where x < 0. So ReLU acts
+        # like a gate. Where the input was positive the upstream gradient
+        # passes through unchanged, everywhere else it is blocked (set to 0).
+        #
+        # --- 2. PSEUDO CODE ---------------------------------------------------
+        #   x  = cache
+        #   dx = dout * (x > 0)
+        #
+        # --- 3. WATCH OUT / OPTIMIZATION -------------------------------------
+        # - At x == 0 the derivative is undefined. The convention is 0, which
+        #   is what (x > 0) gives (not >=).
+        # - (x > 0) is a bool array. Multiplying by it casts to float, so the
+        #   result keeps dout's dtype.
+        # - "Dying ReLU": if a unit is negative for every input, its gradient
+        #   is always 0 and it stops learning (Leaky ReLU fixes this).
+        ########################################################################
+
+        pass
+
+        ########################################################################
+        #                           END OF YOUR CODE                           #
+        ########################################################################
+        return dx
+
+
+def affine_forward(x, w, b):
+    """
+    Computes the forward pass for an affine (fully-connected) layer.
+    The input x has shape (N, d_1, ..., d_k) and contains a minibatch of N
+    examples, where each example x[i] has shape (d_1, ..., d_k). We will
+    reshape each input into a vector of dimension D = d_1 * ... * d_k, and
+    then transform it to an output vector of dimension M.
+    Inputs:
+    :param x: A numpy array containing input data, of shape (N, d_1, ..., d_k)
+    :param w: A numpy array of weights, of shape (D, M)
+    :param b: A numpy array of biases, of shape (M,)
+    :return out: output, of shape (N, M)
+    :return cache: (x, w, b)
+    """
+    N, M = x.shape[0], b.shape[0]
+    out = np.zeros((N,M))
+    ########################################################################
+    # TODO: Implement the affine forward pass. Store the result in out.    #
+    # You will need to reshape the input into rows.                        #
+    ########################################################################
+    # --- 1. EXPLANATION -------------------------------------------------------
+    # z = X W + b. x may come in as e.g. images (N, 3, 32, 32), but W
+    # expects flat vectors of length D = 3*32*32. Flatten every sample into
+    # one row -> (N, D), multiply by W (D, M) -> (N, M), and add b (M,),
+    # which broadcasting copies onto every row.
+    #
+    # --- 2. PSEUDO CODE -------------------------------------------------------
+    #   x_rows = x.reshape(N, -1)        # (N, D)
+    #   out    = x_rows @ w + b          # (N, M)
+    #
+    # --- 3. WATCH OUT / OPTIMIZATION -----------------------------------------
+    # - reshape(N, -1), NOT reshape(-1, D) with hard-coded numbers: let numpy
+    #   infer D so any input shape works.
+    # - Do NOT overwrite x with the reshaped version: cache = (x, w, b) is
+    #   built after your block, and backward needs the ORIGINAL shape of x.
+    # - Use matrix product (@ / np.dot), not '*'.
+    ########################################################################
+
+    pass
+
+    ########################################################################
+    #                           END OF YOUR CODE                           #
+    ########################################################################
+    cache = (x, w, b)
+    return out, cache
+
+
+def affine_backward(dout, cache):
+    """
+    Computes the backward pass for an affine layer.
+    Inputs:
+    :param dout: Upstream derivative, of shape (N, M)
+    :param cache: Tuple of:
+      - x: Input data, of shape (N, d_1, ... d_k)
+      - w: Weights, of shape (D, M)
+      - b: A numpy array of biases, of shape (M,
+    :return dx: Gradient with respect to x, of shape (N, d1, ..., d_k)
+    :return dw: Gradient with respect to w, of shape (D, M)
+    :return db: Gradient with respect to b, of shape (M,)
+    """
+    x, w, b = cache
+    dx, dw, db = None, None, None
+    ########################################################################
+    # TODO: Implement the affine backward pass.                            #
+    ########################################################################
+    # --- 1. EXPLANATION -------------------------------------------------------
+    # Forward was z = X_rows W + b with X_rows (N, D), W (D, M), z (N, M).
+    # Given dout = dL/dz (N, M), the matrix chain rule gives:
+    #       dL/dX_rows = dout @ W.T            (N, M)(M, D) -> (N, D)
+    #       dL/dW      = X_rows.T @ dout       (D, N)(N, M) -> (D, M)
+    #       dL/db      = sum of dout over N    (M,)
+    # Why sum for b: the same b was added to every sample, so its gradient
+    # collects the contribution of each sample.
+    #
+    # --- 2. PSEUDO CODE -------------------------------------------------------
+    #   x_rows = x.reshape(x.shape[0], -1)
+    #   dx = (dout @ w.T).reshape(x.shape)   # back to (N, d_1, ..., d_k)
+    #   dw = x_rows.T @ dout
+    #   db = dout.sum(axis=0)
+    #
+    # --- 3. WATCH OUT / OPTIMIZATION -----------------------------------------
+    # - Shape trick: if you forget the formulas, every gradient must have the
+    #   same shape as its variable. Only one placement of transposes works.
+    # - dx must be reshaped back to the ORIGINAL x shape.
+    # - Do NOT divide by N here. The 1/N comes from the loss's backward,
+    #   which is already inside dout.
+    # - db: axis=0 (sum over the batch), not axis=1 and not a full sum.
+    ########################################################################
+
+
+    pass
+
+    ########################################################################
+    #                           END OF YOUR CODE                           #
+    ########################################################################
+    return dx, dw, db

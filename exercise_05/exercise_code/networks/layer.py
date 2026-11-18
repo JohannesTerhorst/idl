@@ -35,7 +35,8 @@ class Sigmoid:
         # - Docstring: cache must have the same shape as x. out already does.
         ########################################################################
 
-        pass
+        out = 1 / (1 + np.exp(-x))
+        cache = out
 
         ########################################################################
         #                           END OF YOUR CODE                           #
@@ -72,7 +73,8 @@ class Sigmoid:
         #   ReLU replaced it.
         ########################################################################
 
-        pass
+        s = cache
+        dx = dout * s * (1 - s)
 
         ########################################################################
         #                           END OF YOUR CODE                           #
@@ -112,7 +114,8 @@ class Relu:
         #   change the caller's array and the cache.
         ########################################################################
 
-        pass
+        out = np.maximum(0, x)
+        cache = x
 
         ########################################################################
         #                           END OF YOUR CODE                           #
@@ -150,7 +153,8 @@ class Relu:
         #   is always 0 and it stops learning (Leaky ReLU fixes this).
         ########################################################################
 
-        pass
+        x = cache
+        dx = dout * (x > 0)
 
         ########################################################################
         #                           END OF YOUR CODE                           #
@@ -196,7 +200,8 @@ def affine_forward(x, w, b):
     # - Use matrix product (@ / np.dot), not '*'.
     ########################################################################
 
-    pass
+    x_rows = x.reshape(N, -1)
+    out = x_rows @ w + b
 
     ########################################################################
     #                           END OF YOUR CODE                           #
@@ -247,8 +252,10 @@ def affine_backward(dout, cache):
     # - db: axis=0 (sum over the batch), not axis=1 and not a full sum.
     ########################################################################
 
-
-    pass
+    x_rows = x.reshape(x.shape[0], -1)
+    dx = (dout @ w.T).reshape(x.shape)
+    dw = x_rows.T @ dout
+    db = dout.sum(axis=0)
 
     ########################################################################
     #                           END OF YOUR CODE                           #

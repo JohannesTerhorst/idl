@@ -147,7 +147,8 @@ class SGDMomentum(object):
         #   "looked-ahead" point w + beta*v, which usually converges a bit faster.
         ########################################################################
 
-        pass
+        v = config['momentum'] * v - lr * dw
+        next_w = w + v
 
         ########################################################################
         #                           END OF YOUR CODE                           #

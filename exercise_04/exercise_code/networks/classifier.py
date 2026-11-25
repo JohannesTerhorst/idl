@@ -85,7 +85,9 @@ class Classifier(Network):
         #   sigmoid (cheap here, but a key idea for bigger networks).
         ########################################################################
 
-        pass
+        s = X @ self.W
+        z = self.sigmoid(s)
+        self.cache = (X, z)
 
         ########################################################################
         #                           END OF YOUR CODE                           #
@@ -148,7 +150,9 @@ class Classifier(Network):
         # - Use the cached z, don't call sigmoid again.
         ########################################################################
 
-        pass
+        X, z = self.cache
+        ds = dout * z * (1 - z)   # sigmoid'(s) = z * (1 - z)
+        dW = X.T @ ds
 
         ########################################################################
         #                           END OF YOUR CODE                           #
@@ -188,7 +192,7 @@ class Classifier(Network):
         #   e.g. via np.where, or np.clip(x, -500, 500) before exp.
         ########################################################################
 
-        pass
+        out = 1 / (1 + np.exp(-x))
 
         ########################################################################
         #                           END OF YOUR CODE                           #

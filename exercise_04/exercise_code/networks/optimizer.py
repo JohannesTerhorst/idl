@@ -44,7 +44,7 @@ class Optimizer(object):
         #   Adam (adaptive per-parameter step sizes), learning-rate decay.
         ########################################################################
 
-        pass
+        weight = weight - self.lr * dw
 
         ########################################################################
         #                           END OF YOUR CODE                           #

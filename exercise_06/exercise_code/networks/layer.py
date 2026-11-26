@@ -122,7 +122,15 @@ class LeakyRelu:
         # Implement the forward pass of LeakyRelu activation function          #
         ########################################################################
 
-        pass
+        # LeakyReLU(x) = x          if x > 0
+        #              = slope * x  otherwise   (slope is small, e.g. 0.01)
+        # Unlike ReLU, negative inputs still get a small non-zero output, so
+        # the neuron never "dies" completely (its gradient is never exactly 0).
+        outputs = np.where(x > 0, x, self.slope * x)
+
+        # The backward pass only needs to know WHERE x was positive,
+        # so we keep the input itself.
+        cache = x
 
         ########################################################################
         #                           END OF YOUR CODE                           #
@@ -139,7 +147,14 @@ class LeakyRelu:
         # Implement the backward pass of LeakyRelu activation function         #
         ########################################################################
 
-        pass
+        # Local derivative:  d LeakyReLU / dx = 1      if x > 0
+        #                                     = slope  otherwise
+        # Chain rule: dx = dout * local derivative. Each output depends only on
+        # its OWN input, so this is an element-wise product, not a dot product
+        # (same reasoning as in Sigmoid.backward).
+        x = cache
+        local_grad = np.where(x > 0, 1.0, self.slope)
+        dx = dout * local_grad
 
         ########################################################################
         #                           END OF YOUR CODE                           #
@@ -165,7 +180,13 @@ class Tanh:
         # Implement the forward pass of Tanh activation function               #
         ########################################################################
 
-        pass
+        # tanh(x) = (e^x - e^-x) / (e^x + e^-x), squashes x into (-1, 1).
+        # Like sigmoid, but zero-centered: tanh(x) = 2 * sigmoid(2x) - 1.
+        outputs = np.tanh(x)
+
+        # The derivative can be written using the OUTPUT only (see backward),
+        # so we cache the output instead of x - like Sigmoid does.
+        cache = outputs
 
         ########################################################################
         #                           END OF YOUR CODE                           #
@@ -182,7 +203,10 @@ class Tanh:
         # Implement the backward pass of Tanh activation function              #
         ########################################################################
 
-        pass
+        # Local derivative:  d tanh(x) / dx = 1 - tanh(x)^2
+        # Chain rule (element-wise again): dx = dout * (1 - tanh(x)^2)
+        tanh_x = cache
+        dx = dout * (1 - tanh_x ** 2)
 
         ########################################################################
         #                           END OF YOUR CODE                           #
